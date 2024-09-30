@@ -1,0 +1,10 @@
+PyQt5
+pygame
+Pillow
+pyinstaller
+Kivy
+pandas
+matplotlib
+scikit-learn
+Panda3D
+Flask
