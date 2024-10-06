@@ -6,9 +6,11 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.screenmanager import Screen, ScreenManager
 from kivy.uix.textinput import TextInput
 from txt_instruction import txt_instruction, txt_test1, txt_test2, txt_test3,txt_sits
+from result import res
 
 
 
+name = "0"
 class mainscreen(Screen):
     def __init__(self,**kwargs):
         super().__init__(**kwargs)
@@ -32,8 +34,8 @@ class mainscreen(Screen):
         outer.add_widget(self.btn)
         self.add_widget(outer)
     def next(self):
-        global name
-        name = self.in_name.text
+        global age
+        age = self.in_age.text
         self.manager.current = 'pulse2'
         print(10)
 class PulseScr1(Screen):
@@ -53,8 +55,8 @@ class PulseScr1(Screen):
         outer.add_widget(self.btn)
         self.add_widget(outer)
     def next(self):
-        global pul1
-        pul1=self.in_res1.text
+        global p1
+        p1=self.in_res1.text
         self.manager.current = 'pulse3'
 class CheckSits(Screen):
     def __init__ (self, **kwargs):
@@ -90,15 +92,23 @@ class PulseScr2(Screen):
         self.add_widget(outer) 
     def next(self):
         global p2, p3   
-        p2=self.btn.text
-        p3=self.btn.text
+        p2=self.in_res1.text
+        p3=self.in_res2.text
         self.manager.current='resScr'   
 class Result(Screen):
     def __init__ (self, **kwargs):
         super().__init__(**kwargs)
-        PulseScr1()
-        PulseScr2()
-        rufe=Label(text='Ваш индекс Руфье:'((4*(pul1*p2*p3)-200)/10))
+        outer=BoxLayout(orientation='vertical', padding=8, spacing=8)
+        self.instr = Label(text = '')
+        self.add_widget(outer)
+        self.on_enter = self.before
+    def before(self):
+        global name,age,p1,p2,p3
+        age = int(age)
+        p1 = int(p1)
+        p2 = int(p2)
+        p3 = int(p3)
+        self.instr.text = name + "\n" + res(p1,p2,p3,age)
 class HeartCheck(App):
     def build(self):
         sm=ScreenManager()
