@@ -5,12 +5,28 @@ from kivy.uix.image import Image
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.screenmanager import Screen, ScreenManager
 from kivy.uix.textinput import TextInput
+from kivy.clock import Clock
 from txt_instruction import txt_instruction, txt_test1, txt_test2, txt_test3,txt_sits
 from result import res
 
 
 
 name = "0"
+total = 15
+class Seconds(Label):
+    def __init__(self,total,**kw):
+        self.total = total
+        self.current = 0
+        my_text = 'Прошло секунд' + str(self.current)
+        super().__init__(text=my_text)
+    def start(self):
+        Clock.schedule.interval(self.total, 1)
+    def change(self, dt):
+        self.current += 1
+        self.text = 'Прошло секунд' + str(self.current)
+        if self.current >= self.total:
+            return False
+
 class mainscreen(Screen):
     def __init__(self,**kwargs):
         super().__init__(**kwargs)
@@ -33,10 +49,22 @@ class mainscreen(Screen):
         outer.add_widget(line2)
         outer.add_widget(self.btn)
         self.add_widget(outer)
+
+    def check_int(self, str_sum):
+        try:
+            return int(str_sum)
+        except:
+            return False
+    
     def next(self):
-        global age
-        age = self.in_age.text
-        self.manager.current = 'pulse2'
+        global age,name
+        age = self.check_int(self.in_age.text)
+        if not age or age < 7:
+            age = 7
+            self.in_age.text = str(age)
+        else:
+            self.manager.current = 'pulse2'
+        name = self.in_name.text
         print(10)
 class PulseScr1(Screen):
     def __init__(self, **kwargs):
@@ -44,8 +72,9 @@ class PulseScr1(Screen):
         instr1 = Label(text=txt_test1)
         res1 = Label(text='Результат', halign='right')
         self.in_res1 = TextInput(multiline=False)
-        self.btn=Button(text='Дальше', size_hint=(.3,.2), pos_hint={'center_x':.5})
-        self.btn.on_press = self.next
+        self.in_res1.disabled
+        self.btn=Button(text='Начать', size_hint=(.3,.2), pos_hint={'center_x':.5})
+        self.btn.on_press = self.timer1
         line3=BoxLayout(size_hint=(.8,None), height='30sp')
         line3.add_widget(res1)
         line3.add_widget(self.in_res1)
@@ -54,10 +83,27 @@ class PulseScr1(Screen):
         outer.add_widget(line3)
         outer.add_widget(self.btn)
         self.add_widget(outer)
+
+    def timer1(self):
+        Clock.schedule_once(self.enable, 15)
+        self.btn=Button(text='Дальше', size_hint=(.3,.2), pos_hint={'center_x':.5})
+    def enable(self):
+        pass
+
+    def check_int(self, str_num):
+        try:
+            return int(str_num)
+        except:
+            return False
+        
     def next(self):
         global p1
-        p1=self.in_res1.text
-        self.manager.current = 'pulse3'
+        p1 = self.check_int(self.in_res1.text)
+        if p1 == False or p1 <= 0:
+            p1 = 0
+            self.in_res1.text = str(p1)
+        else:
+            self.manager.current = 'pulse3'
 class CheckSits(Screen):
     def __init__ (self, **kwargs):
         super().__init__(**kwargs)
@@ -90,17 +136,37 @@ class PulseScr2(Screen):
         outer.add_widget(line3)
         outer.add_widget(self.btn)
         self.add_widget(outer) 
+
+    def check_int(self, str_num):
+        try: 
+            return int(str_num)
+        except:
+            return False
     def next(self):
-        global p2, p3   
-        p2=self.in_res1.text
-        p3=self.in_res2.text
-        self.manager.current='resScr'   
+        global p2, p3  
+        p2 = self.check_int(self.in_res1.text)
+        p3 = self.check_int(self.in_res2.text) 
+        truefalse1 = False
+        truefalse2 = False
+        if p2 == False or p2 <= 0:
+            p2 = 0
+            self.in_res1.text = str(p2)
+        else:
+            truefalse1 = True
+
+        if p3 == False or p3 <= 0:
+            p3 = 0
+            self.in_res2.text = str(p3)
+        else:
+            truefalse2 = True
+        
+        if truefalse1 and truefalse2:
+            self.manager.current = 'resScr'
 class Result(Screen):
     def __init__ (self, **kwargs):
         super().__init__(**kwargs)
-        outer=BoxLayout(orientation='vertical', padding=8, spacing=8)
         self.instr = Label(text = '')
-        self.add_widget(outer)
+        self.add_widget(self.instr)
         self.on_enter = self.before
     def before(self):
         global name,age,p1,p2,p3
