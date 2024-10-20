@@ -8,23 +8,27 @@ from kivy.uix.textinput import TextInput
 from kivy.clock import Clock
 from txt_instruction import txt_instruction, txt_test1, txt_test2, txt_test3,txt_sits
 from result import res
+from kivy.properties import NumericProperty, StringProperty, BooleanProperty
 
 
 
 name = "0"
 total = 15
 class Seconds(Label):
+    done = BooleanProperty(False)
     def __init__(self,total,**kw):
+        self.done = False
         self.total = total
         self.current = 0
-        my_text = 'Прошло секунд' + str(self.current)
+        my_text = 'Прошло секунд: ' + str(self.current)
         super().__init__(text=my_text)
     def start(self):
-        Clock.schedule.interval(self.total, 1)
+        Clock.schedule_interval(self.change, 1)
     def change(self, dt):
         self.current += 1
-        self.text = 'Прошло секунд' + str(self.current)
+        self.text = 'Прошло секунд: ' + str(self.current)
         if self.current >= self.total:
+            self.done = True
             return False
 
 class mainscreen(Screen):
@@ -69,27 +73,29 @@ class mainscreen(Screen):
 class PulseScr1(Screen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        self.next_screen = False
         instr1 = Label(text=txt_test1)
         res1 = Label(text='Результат', halign='right')
+        self.lbl_sec = Seconds(5)
+        self.lbl_sec.bind(done = self.sec_finished)
         self.in_res1 = TextInput(multiline=False)
-        self.in_res1.disabled
+        self.in_res1.set_disabled(True)
         self.btn=Button(text='Начать', size_hint=(.3,.2), pos_hint={'center_x':.5})
-        self.btn.on_press = self.timer1
+        self.btn.on_press = self.next
         line3=BoxLayout(size_hint=(.8,None), height='30sp')
         line3.add_widget(res1)
         line3.add_widget(self.in_res1)
         outer=BoxLayout(orientation='vertical', padding=8, spacing=8)
         outer.add_widget(instr1)
+        outer.add_widget(self.lbl_sec)
         outer.add_widget(line3)
         outer.add_widget(self.btn)
         self.add_widget(outer)
 
-    def timer1(self):
-        Clock.schedule_once(self.enable, 15)
-        self.btn=Button(text='Дальше', size_hint=(.3,.2), pos_hint={'center_x':.5})
-    def enable(self):
-        pass
-
+    def sec_finished(self, *args):
+        self.next_screen = True
+        self.btn.set_disabled(False)
+        self.in_res1.set_disabled(False)
     def check_int(self, str_num):
         try:
             return int(str_num)
@@ -99,11 +105,16 @@ class PulseScr1(Screen):
     def next(self):
         global p1
         p1 = self.check_int(self.in_res1.text)
-        if p1 == False or p1 <= 0:
-            p1 = 0
-            self.in_res1.text = str(p1)
+        if not self.next_screen:
+            self.btn.set_disabled(True)
+            self.in_res1.set_disabled(True)
+            self.lbl_sec.start()
         else:
-            self.manager.current = 'pulse3'
+            if not p1 or p1 <= 0:
+                p1 = 0
+                self.in_res1.text = str(p1)
+            if p1 > 0:
+                self.manager.current = 'pulse3'
 class CheckSits(Screen):
     def __init__ (self, **kwargs):
         super().__init__(**kwargs)

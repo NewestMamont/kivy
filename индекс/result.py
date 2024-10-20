@@ -36,5 +36,5 @@ def res(p1,p2,p3,age):
     else:
         ruff_index = index(p1,p2,p3)
         result1 = txt_res[rufier_result(ruff_index, neud_level(age))]
-        res1 = txt_index + str(ruff_index) + '\n' + txt_workheart + result1
+        res1 = txt_index + str(ruff_index) + '\n' + txt_workheart + ':' + result1
         return res1
